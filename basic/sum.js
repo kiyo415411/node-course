@@ -9,6 +9,8 @@ function sum(n) {
 
 let sum2 = (n) => ((n + 1) * n) / 2;
 
+
+
 console.log(sum(1));
 console.log(sum(2));
 console.log(sum(10));
@@ -18,3 +20,4 @@ console.log(sum2(1));
 console.log(sum2(2));
 console.log(sum2(10));
 console.log(sum2(100));
+
