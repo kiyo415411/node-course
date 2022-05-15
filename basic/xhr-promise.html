@@ -1,15 +1,3 @@
-<!-- XMLHttpRequest -- JQuery Ajex 基底 -->
-
-<!-- HTML 是 XML 的一種 -->
-<!-- XML 多字繁瑣，過於嚴謹 -- 淘汰 -->
-<!--
-<perosn>
-    <name>aming</name>
-    <age>28</age>
-    <city>Taipei</city>
-</perosn>
- -->
-
 <html lang="en">
   <head>
     <title>XHR</title>
@@ -46,18 +34,29 @@
       // add click event
       asyncBtn.addEventListener("click", function () {
         response.innerHTML = "開始非同步請求了！";
-        var xhr = new XMLHttpRequest();
-        // 設定當請求有回覆的要做什麼事
-        xhr.onload = function () {
-          if (this.status === 200) {
-            response.innerHTML = `非同步請求的 response ${this.responseText}`;
-          } else {
-            response.innerHTML = `非同步請求失敗: ${this.status}`;
-          }
-        };
-        // method (get, post, delete, put...), url, async (defalut: true 是非同步)
-        xhr.open("GET", "http://35.78.120.240:3000/sleepy", true);
-        xhr.send();
+
+        let p = new Promise((resolve, reject) => {
+          var xhr = new XMLHttpRequest();
+          // 設定當請求有回覆的要做什麼事
+          xhr.onload = function () {
+            if (this.status === 200) {
+              resolve(`[Pormise] 非同步請求的 response ${this.responseText}`);
+              // response.innerHTML = `非同步請求的 response ${this.responseText}`;
+            } else {
+              reject(`[Promise] 非同步請求失敗: ${this.status}`);
+              // response.innerHTML = `非同步請求失敗: ${this.status}`;
+            }
+          };
+          // method (get, post, delete, put...), url, async (defalut: true 是非同步)
+          xhr.open("GET", "http://35.78.120.240:3000/sleepy", true);
+          xhr.send();
+        });
+
+        p.then((result) => {
+          response.innerHTML = result;
+        }).catch((error) => {
+          response.innerHTML = error;
+        });
       });
 
       var countBtn = document.getElementById("countBtn");
