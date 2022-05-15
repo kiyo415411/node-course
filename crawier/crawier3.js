@@ -4,7 +4,8 @@ const fs = require("fs/promises");
 (async () => {
   try {
     let stockNo = await fs.readFile("stock.txt", "utf-8");
-    // console.log("read stockNo from file", stockNo);
+    console.log("read stockNo from file", stockNo);
+
     const response = await axios.get(
       "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
       {
@@ -16,7 +17,7 @@ const fs = require("fs/promises");
       }
     );
     console.log(response.data);
-  } catch {
-    console.log("read file error");
+  } catch (error) {
+    console.log(error);
   }
 })();
