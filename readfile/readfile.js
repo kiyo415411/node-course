@@ -1,7 +1,7 @@
 const fs = require("fs");
 
 let p = new Promise((resolve, reject) => {
-  fs.readFile("test.txt", "utf-8", (err, data) => {
+  fs.readFile("test1111.txt", "utf-8", (err, data) => {
     if (err) {
       // 錯誤了
       reject(err);
@@ -12,8 +12,10 @@ let p = new Promise((resolve, reject) => {
   });
 });
 
-p.then((result) => {
+p.then((data) => {
   console.log("讀取成功");
-}).catch((error) => {
+  console.log("data");
+}).catch((err) => {
   console.log("喔喔喔，發生錯誤了");
+  console.log("err");
 });
