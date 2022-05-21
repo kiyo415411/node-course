@@ -10,7 +10,7 @@ const mysql = require("mysql2/promise");
         host: "localhost",
         port: 3306,
         user: "admin",
-        password: "123456",
+        password: "",
         database: "stocks",
     });
     let [data, fields] = await connection.execute("SELECT * FROM stocks");
