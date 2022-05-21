@@ -1,4 +1,4 @@
-#How to install
+# How to install
 
 ```bash
 cp .env.example .env
