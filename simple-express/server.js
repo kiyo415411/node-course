@@ -10,8 +10,10 @@ const app = express();
 const path = require("path");
 const mysql = require("mysql2");
 require("dotenv").config();
-// 請一堆工人 connection pool
+const cors = require("cors");
+app.use(cors());
 
+// 請一堆工人 connection pool
 let pool = mysql
     .createPool({
         host: process.env.DB_HOST,
