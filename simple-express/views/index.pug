@@ -1,0 +1,11 @@
+extends _layouts/master
+
+block content
+  table 
+    tr 
+      td test 1
+      td test 2
+    ul
+      //- stocks 是 express 傳過來的資料
+      each val in stocks
+        li 股票名稱 #{val}
