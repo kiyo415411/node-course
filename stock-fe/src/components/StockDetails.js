@@ -1,17 +1,67 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom"; // 拿前端網址變數
+import { API_URL } from "../utils/config";
 
 const StockDetails = () => {
     const [data, setData] = useState([]);
+    // 目前在第幾頁
+    const [page, setPage] = useState(1);
+    // 總筆數 1,2,3,...,12
+    const [lastPage, setLastPage] = useState(1);
+
+    const { stockId } = useParams(); // 從網址上拿變數
+
     useEffect(() => {
         let getPrice = async () => {
-            let response = await axios.get("http://localhost:3001/stocks/2330");
+            let response = await axios.get(`${API_URL}/stocks/${stockId}`, {
+                params: {
+                    page: page,
+                },
+            });
+            // 在 react 裡，不可以直接設定 state 變數
+            // 一定要透過 setXXX 設定狀態才可
             setData(response.data.data);
+            setLastPage(response.data.pagination.lastPage);
+            // setXXX 是非同步函式
         };
         getPrice();
-    }, []);
+    }, [page, stockId]);
+    // 初始化的時候, page 會從沒有定義變成預設值
+    // 點擊頁碼時，會透過 onClick 去設定 page setPage(i) -> 引發副作用
+    // 再次作用 api
+    // 副作用皆在改變完成後才觸發
+    function getPage() {
+        let pages = [];
+        for (let i = 1; i <= lastPage; i++) {
+            pages.push(
+                <li
+                    key={i}
+                    style={{
+                        display: "inline-block",
+                        margin: "2px",
+                        backgroundColor: page === i ? "#00d1b2" : "",
+                        borderColor: page === i ? "#00d1b2" : "#dbdbdb",
+                        color: page === i ? "#fff" : "#363636",
+                        borderWidth: "1px",
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "3px",
+                        textAlign: "center",
+                    }}
+                    onClick={(e) => {
+                        setPage(i);
+                    }}
+                >
+                    {i}
+                </li>
+            );
+        }
+        return pages;
+    }
     return (
         <div>
+            <ul>{getPage()}</ul>
             {data.map((item) => {
                 return (
                     <div

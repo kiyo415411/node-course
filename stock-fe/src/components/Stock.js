@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { useState, useEffect } from "react";
-
+import { API_URL } from "../utils/config";
 // CORS policy 瀏覽器的安全性控制 | 跨來源資源共用
 // 只要跨來源就會被瀏覽器阻擋
 // 想開放 > 找後端開放 > cors | 第三方開發的中間件
@@ -11,7 +11,7 @@ const Stock = () => {
 
     useEffect(() => {
         let getStocks = async () => {
-            let response = await axios.get("http://localhost:3001/stocks");
+            let response = await axios.get(API_URL + "/stocks");
             setStocks(response.data);
         };
         getStocks();
