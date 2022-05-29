@@ -56,7 +56,7 @@ app.use("/aaa", express.static(path.join(__dirname, "public")));
 // function next() | pipeline | 到下一個中間中
 // function response() | 結束整個 cycle
 app.use((request, response, next) => {
-    console.log("我是一個沒用的中間件"); // 若沒有 next 也沒有 response > padding (擱置)
+    // console.log("我是一個沒用的中間件"); // 若沒有 next 也沒有 response > padding (擱置)
     next(); //函式 | 找下一個是誰
 });
 
@@ -111,16 +111,55 @@ app.get("/stocks/:stockId", async (req, res, next) => {
     // req.params | 取得網址上的參數
     // req.params.stockId
     let [data, fields] = await pool.execute(
-        "SELECT * FROM stocks WHERE id=" + req.params.stockId
+        "SELECT * FROM stock_prices WHERE stock_id = ?",
+        [req.params.stockId]
     );
+
+    // RESTful 風格 來設計 api | 鼓勵用 query string 傳遞過濾參數
+    // /stocks/:stockId?=page=1
+
+    // TODO 取得目前在第幾頁 | 以 || 達成預設值
+    // t || f -> t run
+    // f || t -> t run
+    // undefined 為 false
+    let page = req.query.page || 1;
+    console.log("current page: ", page);
+    // TODO 目前的總筆數
+    let [allResults] = await pool.execute(
+        "SELECT * FROM stock_prices WHERE stock_id = ?",
+        [req.params.stockId]
+    );
+    const total = allResults.length;
+    console.log("total page: ", total);
+    // TODO 計算總共有幾頁
+    // Math.ceil 1.1 -> 2 1.05 -> 2
+    // Math.floor 1.1 -> 1 1.5 -> 1
+    const perPage = 5;
+    const lastPage = Math.ceil(total / perPage);
+    console.log("last page: ", lastPage);
+
+    // TODO 計算 offset 是多少 ( 計算要跳過幾筆 )
+    let offset = (page - 1) * perPage;
+    console.log("offset: ", offset);
+    // TODO 取得這一頁的資料 select * ... limit ? offset ?
+
+    // TODO 回覆給前端
+
     // 查無資料
     // method_1 | 200OK | []
     // method_2 | 回覆 404
-    if (data.length === 0) {
-        res.status(404).json(data);
-    } else {
-        res.json(data);
-    }
+    // if (data.length === 0) {
+    //     res.status(404).json(data);
+    // } else {
+    //     res.json(data);
+    // }
+
+    res.json({
+        // 儲存跟頁碼有關的資訊
+        pagination: {},
+        // 真正的資料
+        data: allResults,
+    });
 });
 // 此中間件在所有路由中間的後面
 // 表示沒有符合的網址
