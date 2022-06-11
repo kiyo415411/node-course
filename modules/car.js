@@ -1,13 +1,20 @@
-// export = module.exports = {}; // 每個模組的第一行都會有 | 看不到
+// exports = module.exports = {};
 
 let speed = 100;
+let brand = 'Ford';
+let color = 'RED';
+function run() {
+  console.log('I am running at ' + speed);
+}
 
-exports.brand = "Ford";
+// 盡量不要這樣寫
+// module.exports.name = 'Test';
 
-exports.color = "red";
-
-export.run=function(){
-  console.log('I am running');
+// 沒有匯出 speed，把外不需要的資料「封裝」起來
+module.exports = {
+  brand,
+  color,
+  run,
 };
 
-// return module.exports; // 最後一行會有 | 看不到
+// return module.exports;
