@@ -8,23 +8,13 @@ const app = express();
 
 // path 為內建套件
 const path = require("path");
-const mysql = require("mysql2");
-require("dotenv").config();
 const cors = require("cors");
 app.use(cors());
+require("dotenv").config();
+// mysql2 依賴 dotenv | 同樣寫入 db.js
+// 載入過一次就不會再被載入 | 不用怕重複做
 
-// 請一堆工人 connection pool
-let pool = mysql
-    .createPool({
-        host: process.env.DB_HOST,
-        port: process.env.DP_POST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
-        // 為了 pool 新增的參數
-        connectionLimit: 10,
-    })
-    .promise();
+let pool = require("./utils/db"); // 重構 | 把 db.js 引入
 
 // express 是一個由 middleware (中間件) 組成的世界
 // client - server
@@ -41,6 +31,13 @@ app.set("views", path.join(__dirname, "views"));
 // 設定 express 要用哪一種樣板引擎 (template engine)
 // npm i pug
 app.set("view engine", "pug");
+
+// express.urlencoded 要讓 express 認得 req 裡 body 裡面的資料
+// extended: false --> querystring
+// extended: true --> qs
+app.use(express.urlencoded({ extended: true }));
+// 要讓 express 認得 req 裡 json
+app.use(express.json());
 
 // express 處理靜態資料
 // 靜態資料: html, css 檔案, javascript 檔案, 圖片, 影音檔...
@@ -99,73 +96,12 @@ app.get("/ssr", (req, res, next) => {
     });
 });
 
-// RESTful API
-// 取得 stocks 的列表
-app.get("/stocks", async (req, res, next) => {
-    let [data, fields] = await pool.execute("SELECT * FROM stocks");
-    res.json(data);
-});
+const StockRouter = require("./routers/stockRouter"); // 引進 router
 
-// 取得某個股票 id 的資料 :stockId 變數
-app.get("/stocks/:stockId", async (req, res, next) => {
-    // req.params | 取得網址上的參數
-    // req.params.stockId
-    let [data, fields] = await pool.execute(
-        "SELECT * FROM stock_prices WHERE stock_id = ?",
-        [req.params.stockId]
-    );
+app.use("/api/stocks", StockRouter); // 使用 router
 
-    // RESTful 風格 來設計 api | 鼓勵用 query string 傳遞過濾參數
-    // /stocks/:stockId?=page=1
-
-    // TODO 取得目前在第幾頁 | 以 || 達成預設值
-    // t || f -> t run
-    // f || t -> t run
-    // undefined 為 false
-    let page = req.query.page || 1;
-    // console.log("current page: ", page);
-    // TODO 目前的總筆數
-    let [allResults] = await pool.execute(
-        "SELECT * FROM stock_prices WHERE stock_id = ?",
-        [req.params.stockId]
-    );
-    const total = allResults.length;
-    // console.log("total page: ", total);
-    // TODO 計算總共有幾頁
-    // Math.ceil 1.1 -> 2 1.05 -> 2
-    // Math.floor 1.1 -> 1 1.5 -> 1
-    const perPage = 5;
-    const lastPage = Math.ceil(total / perPage);
-    // console.log("last page: ", lastPage);
-
-    // TODO 計算 offset 是多少 ( 計算要跳過幾筆 )
-    let offset = (page - 1) * perPage;
-    // console.log("offset: ", offset);
-    // TODO 取得這一頁的資料 select * ... limit ? offset ?
-    let [pageResults] = await pool.execute(
-        "SELECT * FROM stock_prices WHERE stock_id = ? ORDER BY date DESC LIMIT ? OFFSET ?",
-        [req.params.stockId, perPage, offset]
-    );
-
-    // console.log(pageResults);
-    // TODO 回覆給前端
-
-    // 查無資料
-    // method_1 | 200OK | []
-    // method_2 | 回覆 404
-    // if (data.length === 0) {
-    //     res.status(404).json(data);
-    // } else {
-    //     res.json(data);
-    // }
-
-    res.json({
-        // 儲存跟頁碼有關的資訊
-        pagination: { total, lastPage, page },
-        // 真正的資料
-        data: pageResults,
-    });
-});
+const AuthRouter = require("./routers/authRouter");
+app.use("/api/auth", AuthRouter);
 // 此中間件在所有路由中間的後面
 // 表示沒有符合的網址
 // 404
@@ -187,4 +123,3 @@ app.use((err, req, res, next) => {
 app.listen(3001, () => {
     console.log("server start at 3001");
 });
-
