@@ -1,7 +1,5 @@
 // npm init -f
-
 // npm i express
-
 const express = require("express");
 // 利用 express 建立一個 express application
 const app = express();
@@ -46,7 +44,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "assets")));
 // http://localhost:3001/images/test1.jpg
 // 方法2: 指定網址 aaa
-app.use("/aaa", express.static(path.join(__dirname, "public")));
+app.use("/public", express.static(path.join(__dirname, "public")));
 // http://localhost:3001/aaa/images/callback-hell.png
 
 // (一般)中間件(函式)(use) middleware [2]
